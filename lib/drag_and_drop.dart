@@ -8,12 +8,18 @@ import 'image_picker.dart';
 
 class DragAndDrop extends StatefulWidget {
   final storage = FirebaseFirestore.instance.collection("pictures_test");
+  bool deleted = false;
   double _x = 0;
   double _y = 0;
   String url = "https://upload.wikimedia.org/wikipedia/commons/3/3d/%D0%9D%D0%B5%D1%82_%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F.jpg";
   Image? img;
   double scale = 0.7;
   String? group;
+  late _DragAndDropState state;
+
+  void reload(){
+    state.reload();
+  }
 
   late DocumentReference docRef;
   late int id;
@@ -48,6 +54,8 @@ class DragAndDrop extends StatefulWidget {
   }
 
 
+
+
   DragAndDrop.fromDocumentSnapshot(this.img, DocumentSnapshot ds,) {
     this.docRef = ds.reference;
     _y = ds['y'];
@@ -66,9 +74,18 @@ class DragAndDrop extends StatefulWidget {
 }
 
 class _DragAndDropState extends State<DragAndDrop> {
+
+  void reload(){
+    print("reloaded");
+    setState(() {});
+  }
+
   double _baseScaleFactor = 0.7;
   @override
   Widget build(BuildContext context) {
+    if (widget.deleted){
+      return Container();
+    }
     return Positioned(
       left: widget._x,
       top: widget._y,
@@ -106,6 +123,7 @@ class _DragAndDropState extends State<DragAndDrop> {
                 ),
                 onPressed: () {
                   setState(() {
+                    widget.deleted = true;
                     stack!.remove(widget);
                   });
                 },

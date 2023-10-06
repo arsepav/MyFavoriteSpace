@@ -19,7 +19,7 @@ class PhotoPicker extends StatefulWidget {
 class _PhotoPickerScreenState extends State<PhotoPicker> {
 
   Image? _imageFile;
-
+  bool isLoading = false;
   _PhotoPickerScreenState(this._imageFile);
 
   uploadImage() async {
@@ -31,15 +31,16 @@ class _PhotoPickerScreenState extends State<PhotoPicker> {
 
     var permissionStatus = await Permission.photos.status;
 
+    setState(() {
+      isLoading = true;
+    });
     if (permissionStatus.isGranted || !permissionStatus.isGranted){
 
 
-      //Select Image
       image = await _imagePicker.pickImage(source: ImageSource.gallery, maxHeight: 500, maxWidth: 500);
       var file = File(image!.path);
 
       if (image != null){
-        //Upload to Firebase
         var snapshot = await _firebaseStorage.ref()
             .child('images/picture_'+widget.dragAndDrop.docRef.id)
             .putFile(file);
@@ -55,11 +56,20 @@ class _PhotoPickerScreenState extends State<PhotoPicker> {
     } else {
       print('Permission not granted. Try Again with permission access');
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading){
+      return const Padding(
+        padding: EdgeInsets.all(12.0),
+        child: SizedBox(width: 100, height: 100,child: CircularProgressIndicator()),
+      );
+    }
     return SizedBox(
       width: 200 * widget.scale,
       child: InkWell(

@@ -42,16 +42,6 @@ class PictureDropStack {
     dragAndDrop.docRef.delete();
     FirebaseStorage.instance.ref()
         .child('images/picture_'+dragAndDrop.docRef.id).delete();
-    for (int i = 0; i < list.length; ++i){
-      print(list[i].docRef.id + " ---- " + dragAndDrop.docRef.id);
-      if (list[i].docRef.id == dragAndDrop.docRef.id){
-        print(list[i]);
-        list.removeAt(i);
-        break;
-      }
-    }
-
-    parent.reload();
   }
 
   void sort() {}
