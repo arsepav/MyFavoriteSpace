@@ -13,7 +13,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Resizable Widget'),
+        title: const Text('Resizable Widget'),
       ),
       body: Center(
         child: GestureDetector(
@@ -29,7 +29,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
             width: 100.0 * _scaleFactor,
             height: 100.0 * _scaleFactor,
             color: Colors.blue,
-            child: Center(
+            child: const Center(
               child: Text(
                 'Resize me',
                 style: TextStyle(

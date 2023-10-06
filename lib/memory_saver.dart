@@ -28,7 +28,12 @@ Future<List<List<String>>> getRecentGroups() async {
 Future<void> addRecentGroups(String name, String password) async {
   List<List<String>> groups = await getRecentGroups();
   List<String> group = [name, password];
-  groups.remove(group);
+  for (int i = 0; i < groups.length; ++i){
+    if (groups[i][0] == group[0]){
+      groups.removeAt(i);
+      i--;
+    }
+  }
   groups = [group] + groups;
   var groupsString = "";
   String n, p;
