@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ResizableWidget extends StatefulWidget {
+  const ResizableWidget({super.key});
+
   @override
   _ResizableWidgetState createState() => _ResizableWidgetState();
 }

@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:some_space/creating_screen.dart';
-import 'package:some_space/main.dart';
 import 'package:some_space/memory_saver.dart';
+import 'package:some_space/space.dart';
 
 Future<String> joinGroupCheck(String name, String password) async {
   var a = await FirebaseFirestore.instance
@@ -17,6 +17,8 @@ Future<String> joinGroupCheck(String name, String password) async {
 }
 
 class LogInScreen extends StatefulWidget {
+  const LogInScreen({super.key});
+
   @override
   State<LogInScreen> createState() => _LogInScreenState();
 }
@@ -42,7 +44,7 @@ class _LogInScreenState extends State<LogInScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => HomeScreen(group),
+          builder: (_) => Space(group),
         ),
       );
     } else {

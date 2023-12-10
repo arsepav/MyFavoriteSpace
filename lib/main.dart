@@ -1,14 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/material.dart';
-import 'package:some_space/drag_and_drop.dart';
 import 'package:some_space/login_screen.dart';
-import 'package:some_space/memory_saver.dart';
-import 'package:some_space/picture_drop_stack.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:some_space/resizeble_widget.dart';
 import 'firebase_options.dart';
-import 'image_picker.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,18 +9,20 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   // deleteAllGroups();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: LogInScreen(),
     );
   }
 }
-
+/*
 class HomeScreen extends StatefulWidget {
   String group;
 
@@ -82,3 +77,4 @@ class HomeScreenState extends State<HomeScreen> {
         ));
   }
 }
+*/
