@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:some_space/space.dart';
+import 'package:some_space/space_editor.dart';
+import 'package:some_space/space_viewer.dart';
 
 Future<String> createGroup(String name, String password) async {
   print("check12");
@@ -44,7 +45,7 @@ class _CreatingGroupScreenState extends State<CreatingGroupScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => Space(group),
+          builder: (_) => SpaceViewer(group),
         ),
       );
     }

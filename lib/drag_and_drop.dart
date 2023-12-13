@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -11,18 +13,52 @@ import 'image_picker.dart';
 class DragAndDrop extends StatefulWidget {
   final storage = FirebaseFirestore.instance.collection("pictures_test");
   bool deleted = false;
-  double _x = 0;
-  double _y = 0;
+  double x = 0;
+  double y = 0;
   String url = "https://upload.wikimedia.org/wikipedia/commons/3/3d/%D0%9D%D0%B5%D1%82_%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F.jpg";
-  int imageIndex = 0;
   double scale = 0.7;
   String? group;
-  int prioty = 0;
+  int priority = 0;
   PictureDropStack stack;
+  bool editable = false;
+  bool uploaded = false;
+  File? imageFile;
 
   bool imageLoaded;
-  
+
   late Image image;
+
+  late DateTime time;
+
+  late _DragAndDropState state;
+  DocumentReference? docRef;
+
+  DragAndDrop copy(){
+    var tmp = DragAndDrop(group, imageFile, stack, imageLoaded, key: key,);
+    tmp.x = this.x;
+    tmp.y = this.y;
+    tmp.url = this.url;
+    tmp.scale = this.scale;
+    tmp.priority = this.priority;
+    tmp.editable = this.editable;
+    tmp.uploaded = this.uploaded;
+    tmp.imageLoaded = this.imageLoaded;
+    tmp.image = this.image;
+    tmp.time = this.time;
+    tmp.docRef = this.docRef;
+    return tmp;
+  }
+
+  doesImageExist() async {
+    try {
+      final response = await http.head(Uri.parse(url));
+      if (response.statusCode == 404){
+        deleted = true;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
 
   bool operator>(DragAndDrop dnd){
     return time.compareTo(dnd.time) > 0;
@@ -32,69 +68,78 @@ class DragAndDrop extends StatefulWidget {
     return time.compareTo(dnd.time);
   }
 
-  late DateTime time;
-
-  late _DragAndDropState state;
-
   void reload(){
     state.reload();
   }
 
-  DocumentReference? docRef;
-  late int id;
-
   Map<String, dynamic> toCoordJson() {
     return {
-      "x": _x,
-      'y': _y,
+      "x": x,
+      'y': y,
       'scale': scale,
       "time": Timestamp.fromDate(time),
-      'priority' : prioty,
+      'priority' : priority,
     };
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "x": _x,
-      "y": _y,
+      "x": x,
+      "y": y,
       "url": url,
       "scale": scale,
       "group": group,
       "time": Timestamp.fromDate(time),
-      "priority": prioty,
+      "priority": priority,
     };
   }
 
-  void addDocument(File imgFile) async {
-    docRef = await storage.add(toJson());
-    url = await uploadImage(imgFile ,docRef!.id);
-    await docRef!.update({'url' : url});
-    imageLoaded = true;
-    reload();
+  void saveDocument() async {
+    if (deleted){
+      docRef!.delete();
+      FirebaseStorage.instance
+          .ref()
+          .child('images/picture_${docRef!.id}')
+          .delete();
+    }
+    if (uploaded){
+      if (docRef != null) {
+        docRef!.update(toCoordJson());
+      }
+    }
+    else {
+      docRef = await storage.add(toJson());
+      url = await uploadImage(imageFile!, docRef!.id);
+      await docRef!.update({'url': url});
+      imageLoaded = true;
+    }
   }
 
+  //TODO copy-constructor
 
-  DragAndDrop.fromDocumentSnapshot(this.image, DocumentSnapshot ds, this.stack, this.imageLoaded, {super.key}) {
+  DragAndDrop.fromDocumentSnapshot(this.image, DocumentSnapshot ds, this.stack, this.imageLoaded, this.editable, {super.key}) {
     Timestamp myTimeStamp = ds['time'];
     time = myTimeStamp.toDate();
     docRef = ds.reference;
-    _y = ds['y'];
-    _x = ds['x'];
+    y = ds['y'];
+    x = ds['x'];
     scale = ds['scale'];
     group = ds['group'] ?? "test";
-    prioty = ds['priority'];
+    priority = ds['priority'];
     url = ds['url'];
-
+    doesImageExist();
+    uploaded = true;
   }
 
 
 
-  DragAndDrop(this.group, File imgFile, this.stack, this.imageLoaded, {super.key}) {
+  DragAndDrop(this.group, this.imageFile, this.stack, this.imageLoaded, {super.key}) {
     time = DateTime.now();
-    _x = 0;
-    _y = 0;
-    image = Image.file(imgFile);
-    addDocument(imgFile);
+    x = 0;
+    y = 0;
+    if (imageFile != null) {
+      image = Image.file(imageFile!, fit: BoxFit.cover,);
+    }
   }
 
   @override
@@ -110,46 +155,40 @@ class _DragAndDropState extends State<DragAndDrop> {
   double _baseScaleFactor = 0.7;
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     widget.state = this;
     if (widget.deleted){
       return Container();
     }
     return Positioned(
-      left: widget._x,
-      top: widget._y,
+      left: widget.x,
+      top: widget.y,
       child: Stack(
         children: [
           Container(
             color: Colors.grey,
-            child: Center(
+            child: !widget.editable ? SizedBox(width: min(max(200 * widget.scale, 100), widget.image.width ?? 500),child: widget.image)
+                : Center(
               child: GestureDetector(
                 onScaleStart: (details) {
                   _baseScaleFactor = widget.scale;
-                  if (widget.docRef != null) {
-                    widget.docRef!.update(widget.toCoordJson());
-                  }
                 },
                 onDoubleTap: (){
                   widget.stack.onTop(widget);
-                  if (widget.docRef != null) {
-                    widget.docRef!.update(widget.toCoordJson());
-                  }
                 },
                 onScaleUpdate: (details) {
                   setState(() {
                     widget.scale = _baseScaleFactor * details.scale;
-                    widget._x += details.focalPointDelta.dx;
-                    widget._y += details.focalPointDelta.dy;
+                    widget.x = widget.x + details.focalPointDelta.dx;
+                    widget.y += details.focalPointDelta.dy;
                   });
-                  if (widget.docRef != null) {
-                    widget.docRef!.update(widget.toCoordJson());
-                  }
                 },
-                child: SizedBox(width: min(max(200 * widget.scale, 100), widget.image.width ?? 800),child: widget.image),
+                child: SizedBox(width: min(max(200 * widget.scale, 100), widget.image.width ?? 500),child: widget.image),
               ),
             ),
           ),
-          Positioned(
+          !widget.editable ? Container() : Positioned(
             right: 0,
             top: 0,
             child: CircleAvatar(
@@ -162,7 +201,6 @@ class _DragAndDropState extends State<DragAndDrop> {
                 onPressed: () {
                   setState(() {
                     widget.deleted = true;
-                    widget.stack.remove(widget);
                   });
                 },
               ),
@@ -182,3 +220,114 @@ class _DragAndDropState extends State<DragAndDrop> {
     );
   }
 }
+/*
+class DND{
+  double x = 0;
+  double y = 0;
+  double scale = 0.7;
+
+  int priority = 0;
+
+  File? imageFile;
+  Image image;
+
+  PictureDropStack stack;
+
+  String url;
+
+  String group;
+
+  DND(this.image, this.url, this.group, this.stack);
+
+  DND.fromReference(this.image, this.url, this.group, this.stack, this.x, this.y, this.scale, this.priority);
+
+  Map<String, dynamic> toJson() {
+    return {
+      "x": x,
+      "y": y,
+      "url": url,
+      "scale": scale,
+      "group": group,
+      "priority": priority,
+    };
+  }
+}
+
+class DNDEditable extends StatefulWidget{
+  DND dnd;
+
+  DNDEditable(this.dnd);
+
+  @override
+  State<StatefulWidget> createState() => _DNDEditableState();
+}
+
+class _DNDEditableState extends State<DNDEditable> {
+  @override
+  Widget build(BuildContext context) {
+    // widget.state = this;
+    // if (widget.dnd.deleted){
+    //  return Container();
+    // }
+    double _baseScaleFactor = widget.dnd.scale;
+    return Positioned(
+      left: widget.dnd.x,
+      top: widget.dnd.y,
+      child: Stack(
+        children: [
+          Container(
+            color: Colors.grey,
+            child: Center(
+              child: GestureDetector(
+                onScaleStart: (details) {
+                  _baseScaleFactor = widget.dnd.scale;
+                },
+                onDoubleTap: (){
+                  widget.dnd.stack.onTop(widget);
+                },
+                onScaleUpdate: (details) {
+                  setState(() {
+                    widget.dnd.scale = _baseScaleFactor * details.scale;
+                    widget.dnd._x = widget.dnd._x + details.focalPointDelta.dx;
+                    widget.dnd._y += details.focalPointDelta.dy;
+                  });
+                },
+                child: SizedBox(width: min(max(200 * widget.dnd.scale, 100), widget.dnd.image.width ?? 500),child: widget.dnd.image),
+              ),
+            ),
+          ),
+          !widget.dnd.editable ? Container() : Positioned(
+            right: 0,
+            top: 0,
+            child: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.delete_forever_rounded,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    widget.dnd.deleted = true;
+                    widget.dnd.stack.remove(widget);
+                  });
+                },
+              ),
+            ),
+          ),
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              child: widget.dnd.imageLoaded ? Container() : const CircularProgressIndicator(),
+            ),
+          ),
+
+        ],
+      ),
+    );
+  }
+
+}
+*/

@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:some_space/creating_screen.dart';
 import 'package:some_space/memory_saver.dart';
-import 'package:some_space/space.dart';
+import 'package:some_space/space_editor.dart';
+import 'package:some_space/space_viewer.dart';
 
 Future<String> joinGroupCheck(String name, String password) async {
   var a = await FirebaseFirestore.instance
@@ -44,7 +45,7 @@ class _LogInScreenState extends State<LogInScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => Space(group),
+          builder: (_) => SpaceViewer(group),
         ),
       );
     } else {
