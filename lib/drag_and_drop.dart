@@ -19,12 +19,12 @@ class DragAndDrop extends StatefulWidget {
   double scale = 0.7;
   String? group;
   int priority = 0;
-  PictureDropStack stack;
+  late PictureDropStack stack;
   bool editable = false;
   bool uploaded = false;
   File? imageFile;
 
-  bool imageLoaded;
+  bool imageLoaded = true;
 
   late Image image;
 
@@ -34,19 +34,7 @@ class DragAndDrop extends StatefulWidget {
   DocumentReference? docRef;
 
   DragAndDrop copy(){
-    var tmp = DragAndDrop(group, imageFile, stack, imageLoaded, key: key,);
-    tmp.x = this.x;
-    tmp.y = this.y;
-    tmp.url = this.url;
-    tmp.scale = this.scale;
-    tmp.priority = this.priority;
-    tmp.editable = this.editable;
-    tmp.uploaded = this.uploaded;
-    tmp.imageLoaded = this.imageLoaded;
-    tmp.image = this.image;
-    tmp.time = this.time;
-    tmp.docRef = this.docRef;
-    return tmp;
+    return DragAndDrop.copy(this);
   }
 
   doesImageExist() async {
@@ -115,8 +103,6 @@ class DragAndDrop extends StatefulWidget {
     }
   }
 
-  //TODO copy-constructor
-
   DragAndDrop.fromDocumentSnapshot(this.image, DocumentSnapshot ds, this.stack, this.imageLoaded, this.editable, {super.key}) {
     Timestamp myTimeStamp = ds['time'];
     time = myTimeStamp.toDate();
@@ -129,6 +115,25 @@ class DragAndDrop extends StatefulWidget {
     url = ds['url'];
     doesImageExist();
     uploaded = true;
+  }
+
+  DragAndDrop.copy(DragAndDrop dnd) {
+    imageLoaded = dnd.imageLoaded;
+    group = dnd.group;
+    imageFile = dnd.imageFile;
+    stack = dnd.stack;
+    imageLoaded = dnd.imageLoaded;
+    x = dnd.x;
+    y = dnd.y;
+    url = dnd.url;
+    scale = dnd.scale;
+    priority = dnd.priority;
+    editable = dnd.editable;
+    uploaded = dnd.uploaded;
+    imageLoaded = dnd.imageLoaded;
+    image = dnd.image;
+    time = dnd.time;
+    docRef = dnd.docRef;
   }
 
 
@@ -168,7 +173,7 @@ class _DragAndDropState extends State<DragAndDrop> {
         children: [
           Container(
             color: Colors.grey,
-            child: !widget.editable ? SizedBox(width: min(max(200 * widget.scale, 100), widget.image.width ?? 500),child: widget.image)
+            child: !widget.editable ? SizedBox(width: min(max(200 * widget.scale, 100), widget.image.width?? 500),child: widget.image)
                 : Center(
               child: GestureDetector(
                 onScaleStart: (details) {
@@ -220,114 +225,3 @@ class _DragAndDropState extends State<DragAndDrop> {
     );
   }
 }
-/*
-class DND{
-  double x = 0;
-  double y = 0;
-  double scale = 0.7;
-
-  int priority = 0;
-
-  File? imageFile;
-  Image image;
-
-  PictureDropStack stack;
-
-  String url;
-
-  String group;
-
-  DND(this.image, this.url, this.group, this.stack);
-
-  DND.fromReference(this.image, this.url, this.group, this.stack, this.x, this.y, this.scale, this.priority);
-
-  Map<String, dynamic> toJson() {
-    return {
-      "x": x,
-      "y": y,
-      "url": url,
-      "scale": scale,
-      "group": group,
-      "priority": priority,
-    };
-  }
-}
-
-class DNDEditable extends StatefulWidget{
-  DND dnd;
-
-  DNDEditable(this.dnd);
-
-  @override
-  State<StatefulWidget> createState() => _DNDEditableState();
-}
-
-class _DNDEditableState extends State<DNDEditable> {
-  @override
-  Widget build(BuildContext context) {
-    // widget.state = this;
-    // if (widget.dnd.deleted){
-    //  return Container();
-    // }
-    double _baseScaleFactor = widget.dnd.scale;
-    return Positioned(
-      left: widget.dnd.x,
-      top: widget.dnd.y,
-      child: Stack(
-        children: [
-          Container(
-            color: Colors.grey,
-            child: Center(
-              child: GestureDetector(
-                onScaleStart: (details) {
-                  _baseScaleFactor = widget.dnd.scale;
-                },
-                onDoubleTap: (){
-                  widget.dnd.stack.onTop(widget);
-                },
-                onScaleUpdate: (details) {
-                  setState(() {
-                    widget.dnd.scale = _baseScaleFactor * details.scale;
-                    widget.dnd._x = widget.dnd._x + details.focalPointDelta.dx;
-                    widget.dnd._y += details.focalPointDelta.dy;
-                  });
-                },
-                child: SizedBox(width: min(max(200 * widget.dnd.scale, 100), widget.dnd.image.width ?? 500),child: widget.dnd.image),
-              ),
-            ),
-          ),
-          !widget.dnd.editable ? Container() : Positioned(
-            right: 0,
-            top: 0,
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.delete_forever_rounded,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    widget.dnd.deleted = true;
-                    widget.dnd.stack.remove(widget);
-                  });
-                },
-              ),
-            ),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 0,
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              child: widget.dnd.imageLoaded ? Container() : const CircularProgressIndicator(),
-            ),
-          ),
-
-        ],
-      ),
-    );
-  }
-
-}
-*/

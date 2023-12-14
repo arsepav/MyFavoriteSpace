@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:some_space/creating_screen.dart';
 import 'package:some_space/memory_saver.dart';
-import 'package:some_space/space_editor.dart';
 import 'package:some_space/space_viewer.dart';
+import 'package:some_space/theme/theme_constants.dart';
+import 'package:some_space/theme/theme_manager.dart';
 
 Future<String> joinGroupCheck(String name, String password) async {
   var a = await FirebaseFirestore.instance
@@ -33,6 +35,26 @@ class _LogInScreenState extends State<LogInScreen> {
 
   bool joinProblem = false;
 
+  @override
+  void dispose(){
+    themeManager.removeListener(themeListener);
+    super.dispose();
+  }
+
+  @override
+  void initState(){
+    themeManager.addListener(themeListener);
+    super.initState();
+  }
+
+  themeListener(){
+    if (mounted){
+      setState(() {
+
+      });
+    }
+  }
+
   Future<void> someFunction(String name, String password) async {
     String group = await joinGroupCheck(name, password);
     setState(() {
@@ -55,9 +77,28 @@ class _LogInScreenState extends State<LogInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var themeNotifier = Provider.of<ThemeNotifier>(context);
+
     return Scaffold(
+      // backgroundColor: DarkTheme.backgroundColor,
+
       appBar: AppBar(
         title: const Text("Welcome"),
+        // backgroundColor: DarkTheme.backgroundColor,
+        actions: [
+          /*Switch(value: themeManager.themeMode == ThemeMode.dark,
+              onChanged: (newValue){
+                themeManager.toggleTheme(newValue);
+          setState(() {
+            var newTheme =
+            (themeNotifier.getTheme().brightness == Brightness.dark)
+                ? lightTheme
+                : darkTheme;
+
+            themeNotifier.setTheme(newTheme);
+          });
+        }),*/
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -94,6 +135,7 @@ class _LogInScreenState extends State<LogInScreen> {
                             someFunction(groupTextController.text,
                                 passwordTextController.text);
                           },
+                          //style: ElevatedButton.styleFrom(backgroundColor: DarkTheme.buttonsColor),
                           child: const Text('Join'),
                         ),
                       ],
@@ -107,6 +149,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     ),
                   );
                 },
+                // style: ElevatedButton.styleFrom(backgroundColor: DarkTheme.buttonsColor),
                 child: const Text("Create new group"),
               ),
               const SizedBox(height: 25,),
@@ -128,7 +171,9 @@ class _LogInScreenState extends State<LogInScreen> {
                         itemBuilder: (context, index) {
                           return ElevatedButton(onPressed: (){
                             someFunction(groups[index][0], groups[index][1]);
-                          }, child: Text(groups[index][0]));
+                          },
+                              // style: ElevatedButton.styleFrom(backgroundColor: DarkTheme.buttonsColor),
+                              child: Text(groups[index][0]));
                         },
                       );
                   }
