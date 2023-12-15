@@ -37,13 +37,16 @@ class PictureDropStack {
       print(listEditible.length);
       for(int i = 0; i < listEditible.length; ++i){
         if (!listEditible[i].deleted) {
-          list.add(listEditible[i]);
+          list.add(listEditible[i].copy());
           list[list.length-1].editable = false;
           //list[list.length-1].reload();
-          print("${list[i].x} ${list[i].y}");
           list[list.length-1].priority++;
+          list[list.length-1].saveDocument();
         }
-        list[i].saveDocument();
+        else{
+          listEditible[i].saveDocument();
+        }
+
 
       }
     }

@@ -100,6 +100,8 @@ class DragAndDrop extends StatefulWidget {
       url = await uploadImage(imageFile!, docRef!.id);
       await docRef!.update({'url': url});
       imageLoaded = true;
+      state.reload();
+      print("Картинка загружена!");
     }
   }
 
@@ -138,13 +140,14 @@ class DragAndDrop extends StatefulWidget {
 
 
 
-  DragAndDrop(this.group, this.imageFile, this.stack, this.imageLoaded, {super.key}) {
+  DragAndDrop(this.group, this.imageFile, this.stack, this.imageLoaded, {this.editable = true, super.key}) {
     time = DateTime.now();
     x = 0;
     y = 0;
     if (imageFile != null) {
       image = Image.file(imageFile!, fit: BoxFit.cover,);
     }
+    stack.onTop(this);
   }
 
   @override
@@ -216,7 +219,7 @@ class _DragAndDropState extends State<DragAndDrop> {
             bottom: 0,
             child: CircleAvatar(
               backgroundColor: Colors.transparent,
-              child: widget.imageLoaded ? Container() : const CircularProgressIndicator(),
+              child: widget.imageLoaded || widget.editable ? Container() : const CircularProgressIndicator(),
             ),
           ),
 

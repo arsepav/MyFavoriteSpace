@@ -55,24 +55,6 @@ class SpaceViewerState extends State<SpaceViewer> implements SpaceState {
             Stack(
               children: widget.dnds.list,
             ),
-            Positioned(
-              left: 20,
-              bottom: 20,
-              child: CircleAvatar(
-                radius: 35,
-                backgroundColor: Colors.green,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.save_rounded,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                  onPressed: () {
-                    reload();
-                  },
-                ),
-              ),
-            ),
           ],
         ));
   }

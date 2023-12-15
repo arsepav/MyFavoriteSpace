@@ -35,9 +35,7 @@ class _CreatingGroupScreenState extends State<CreatingGroupScreen> {
   bool groupAlreadyExists = false;
 
   Future<void> someFunction(String name, String password) async {
-    print("before1");
     String group = await createGroupCheck(name, password);
-    print("after1");
     setState(() {
       isLoading = false;
     });
@@ -58,38 +56,41 @@ class _CreatingGroupScreenState extends State<CreatingGroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Экран с полями ввода'),
+        title: const Text('Create your space'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: inputController1,
-              decoration: const InputDecoration(labelText: 'Поле 1'),
-            ),
-            TextField(
-              controller: inputController2,
-              decoration: const InputDecoration(labelText: 'Поле 2'),
-            ),
-            const SizedBox(height: 20),
-            isLoading
-                ? const CircularProgressIndicator()
-                : Column(
-                  children: [
-                    groupAlreadyExists ? const Text("Group already exists") : Container(),
-                    ElevatedButton(
-              onPressed: () {
-                    setState(() {
-                      isLoading = true;
-                    });
-                    someFunction(inputController1.text, inputController2.text);
-              },
-              child: const Text('Отправить'),
-            ),
-                  ],
-                ),
-          ],
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: inputController1,
+                decoration: const InputDecoration(labelText: 'name of space'),
+              ),
+              TextField(
+                controller: inputController2,
+                decoration: const InputDecoration(labelText: 'password'),
+              ),
+              const SizedBox(height: 20),
+              isLoading
+                  ? const CircularProgressIndicator()
+                  : Column(
+                    children: [
+                      groupAlreadyExists ? const Text("Space already exists") : Container(),
+                      ElevatedButton(
+                onPressed: () {
+                      setState(() {
+                        isLoading = true;
+                      });
+                      someFunction(inputController1.text, inputController2.text);
+                },
+                child: const Text('Create'),
+              ),
+                    ],
+                  ),
+            ],
+          ),
         ),
       ),
     );
