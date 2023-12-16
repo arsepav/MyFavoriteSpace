@@ -8,12 +8,9 @@ import 'package:flutter/material.dart';
 
 class SpaceEditor extends Space {
   String group;
-  late PictureGetter pictureGetter;
   PictureDropStack dnds;
 
-  SpaceEditor(this.group, this.dnds){
-    pictureGetter = PictureGetter();
-  }
+  SpaceEditor(this.group, this.dnds){}
 
   @override
   State<SpaceEditor> createState() => SpaceEditorState();
@@ -52,11 +49,11 @@ class SpaceEditorState extends State<SpaceEditor> implements SpaceState {
                     size: 30,
                   ),
                   onPressed: () async {
-                    var image = await widget.pictureGetter.pickImage();
+                    var image = await pickImage();
                     if (image != null) {
                       setState(
                             () {
-                          widget.dnds.add(DragAndDrop(widget.group, image, widget.dnds, false));
+                          widget.dnds.add(DragAndDrop(widget.group, widget.dnds, 'picture'));
                         },
                       );
                     }

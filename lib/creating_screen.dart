@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:some_space/space_editor.dart';
 import 'package:some_space/space_viewer.dart';
 
 Future<String> createGroup(String name, String password) async {
@@ -12,8 +11,6 @@ Future<String> createGroup(String name, String password) async {
 
 Future<String> createGroupCheck(String name, String password) async {
   var a = await FirebaseFirestore.instance.collection("groups").where('name', isEqualTo: name).get();
-  print("a.size");
-  print(a.size);
   if (a.size == 0){
     return createGroup(name, password);
   }

@@ -8,11 +8,9 @@ import 'package:flutter/material.dart';
 
 class SpaceViewer extends Space {
   String group;
-  late PictureGetter pictureGetter;
   late PictureDropStack dnds;
 
   SpaceViewer(this.group) {
-    pictureGetter = PictureGetter();
     dnds = PictureDropStack(group);
   }
 

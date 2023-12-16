@@ -13,7 +13,7 @@ import 'package:some_space/space_viewer.dart';
 // List<PhotoPicker?> imagePickers = [];
 
 class PictureDropStack {
-  final storage = FirebaseFirestore.instance.collection("pictures_test");
+  final storage = FirebaseFirestore.instance.collection("drag_and_drops");
   int lastId = 0;
   int top = 1;
   List<DragAndDrop> list = [];
@@ -24,7 +24,7 @@ class PictureDropStack {
 
   void add(DragAndDrop dragAndDrop) {
     listEditible.add(dragAndDrop);
-    sort();
+    onTop(dragAndDrop);
     if (editor != null) {
       editor!.reload();
     }
@@ -36,18 +36,21 @@ class PictureDropStack {
       list = [];
       print(listEditible.length);
       for(int i = 0; i < listEditible.length; ++i){
-        if (!listEditible[i].deleted) {
+        print(listEditible[i].uploadedState);
+        if (listEditible[i].uploadedState == DNDState.edited || listEditible[i].uploadedState == DNDState.created){
+          print('saving');
           list.add(listEditible[i].copy());
-          list[list.length-1].editable = false;
-          //list[list.length-1].reload();
-          list[list.length-1].priority++;
-          list[list.length-1].saveDocument();
+          list.last.saveDocument();
+          list.last.editable = false;
+          listEditible[i].uploadedState = DNDState.uploaded;
+        }
+        else if (listEditible[i].uploadedState == DNDState.uploaded){
+          list.add(listEditible[i].copy());
+          list.last.editable = false;
         }
         else{
           listEditible[i].saveDocument();
         }
-
-
       }
     }
     sort();
@@ -68,7 +71,7 @@ class PictureDropStack {
   }
 
   void sort() {
-    list.sort((a, b) => a.priority.compareTo(b.priority));
+    // list.sort((a, b) => a.priority.compareTo(b.priority));
     listEditible.sort((a, b) => a.priority.compareTo(b.priority));
     if (editor != null) {
       editor!.reload();
@@ -77,23 +80,22 @@ class PictureDropStack {
   }
 
   void onTop(DragAndDrop dnd) {
-    dnd.priority = top++;
+    dnd.priority = listEditible.last.priority + 5;
     sort();
+    for (int i = 0; i < listEditible.length; ++i){
+      if (listEditible[i].priority != i) {
+        listEditible[i].priority = i;
+        listEditible[i].uploadedState = DNDState.edited;
+      }
+    }
     editor!.reload();
   }
 
   Future<void> fillList(edit) async {
     var a = await storage.where('group', isEqualTo: group).get();
     Image img;
-    // print(a.docs.length);
     for (var doc in a.docs) {
-      top = max(top, doc['priority'] + 1);
-      img = Image.network(
-        doc['url']!,
-        fit: BoxFit.cover,
-      );
-      // print(img);
-      list.add(DragAndDrop.fromDocumentSnapshot(img, doc, this, true, edit));
+      list.add(DragAndDrop.fromDocumentSnapshot(doc, this));
     }
     sort();
     viewer.reload();
