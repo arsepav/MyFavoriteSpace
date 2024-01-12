@@ -1,4 +1,3 @@
-
 import 'package:some_space/drag_and_drop.dart';
 import 'package:some_space/picture_drop_stack.dart';
 import 'package:some_space/space.dart';
@@ -10,7 +9,7 @@ class SpaceEditor extends Space {
   String group;
   PictureDropStack dnds;
 
-  SpaceEditor(this.group, this.dnds){}
+  SpaceEditor(this.group, this.dnds) {}
 
   @override
   State<SpaceEditor> createState() => SpaceEditorState();
@@ -25,7 +24,7 @@ class SpaceEditorState extends State<SpaceEditor> implements SpaceState {
   @override
   Widget build(BuildContext context) {
     widget.dnds.editor = this;
-    print(widget.dnds.listEditible.length);
+    print(widget.dnds.listEditable.length);
     print("build");
     return Scaffold(
         appBar: AppBar(
@@ -34,7 +33,7 @@ class SpaceEditorState extends State<SpaceEditor> implements SpaceState {
         body: Stack(
           children: [
             Stack(
-              children: widget.dnds.listEditible,
+              children: widget.dnds.listEditable,
             ),
             Positioned(
               right: 20,
@@ -49,14 +48,12 @@ class SpaceEditorState extends State<SpaceEditor> implements SpaceState {
                     size: 30,
                   ),
                   onPressed: () async {
-                    var image = await pickImage();
-                    if (image != null) {
-                      setState(
-                            () {
-                          widget.dnds.add(DragAndDrop(widget.group, widget.dnds, 'picture'));
-                        },
-                      );
-                    }
+                    setState(
+                      () {
+                        widget.dnds.add(
+                            DragAndDrop(widget.group, widget.dnds, 'picture'));
+                      },
+                    );
                   },
                 ),
               ),

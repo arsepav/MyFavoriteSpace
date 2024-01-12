@@ -1,9 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:some_space/authentication/authentication_service.dart';
+import 'package:some_space/creating_screen.dart';
 import 'package:some_space/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:some_space/theme/theme_constants.dart';
 import 'package:some_space/theme/theme_manager.dart';
+import 'authentication/authentication_screen.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -11,8 +15,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // deleteAllGroups();
   runApp(const MyApp());
+  signOut();
 }
 
 class MyApp extends StatelessWidget {
@@ -25,7 +29,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         theme: darkTheme,
         themeMode: themeManager.themeMode,
-        home: const LogInScreen(),
+        home: is_logged_in() ? CreatingGroupScreen(): AuthenticationScreen() ,
       ),
     );
   }

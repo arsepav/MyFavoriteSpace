@@ -8,22 +8,18 @@ import 'package:some_space/space.dart';
 import 'package:some_space/space_editor.dart';
 import 'package:some_space/space_viewer.dart';
 
-// PictureDropStack? stack;
-// List<Image?> images = [];
-// List<PhotoPicker?> imagePickers = [];
-
 class PictureDropStack {
   final storage = FirebaseFirestore.instance.collection("drag_and_drops");
   int lastId = 0;
   int top = 1;
   List<DragAndDrop> list = [];
-  List<DragAndDrop> listEditible = [];
+  List<DragAndDrop> listEditable = [];
   SpaceEditorState? editor;
   late SpaceViewerState viewer;
   String group;
 
   void add(DragAndDrop dragAndDrop) {
-    listEditible.add(dragAndDrop);
+    listEditable.add(dragAndDrop);
     onTop(dragAndDrop);
     if (editor != null) {
       editor!.reload();
@@ -31,25 +27,21 @@ class PictureDropStack {
   }
 
   void exitEditState({bool saveChanges = true}) {
-    print("going from edit");
     if (saveChanges) {
       list = [];
-      print(listEditible.length);
-      for(int i = 0; i < listEditible.length; ++i){
-        print(listEditible[i].uploadedState);
-        if (listEditible[i].uploadedState == DNDState.edited || listEditible[i].uploadedState == DNDState.created){
-          print('saving');
-          list.add(listEditible[i].copy());
+      for(int i = 0; i < listEditable.length; ++i){
+        if (listEditable[i].uploadedState == DNDState.edited || listEditable[i].uploadedState == DNDState.created){
+          list.add(listEditable[i].copy());
           list.last.saveDocument();
           list.last.editable = false;
-          listEditible[i].uploadedState = DNDState.uploaded;
+          listEditable[i].uploadedState = DNDState.uploaded;
         }
-        else if (listEditible[i].uploadedState == DNDState.uploaded){
-          list.add(listEditible[i].copy());
+        else if (listEditable[i].uploadedState == DNDState.uploaded){
+          list.add(listEditable[i].copy());
           list.last.editable = false;
         }
         else{
-          listEditible[i].saveDocument();
+          listEditable[i].saveDocument();
         }
       }
     }
@@ -60,32 +52,40 @@ class PictureDropStack {
 
   void openEditState() {
     print("going to edit");
-    listEditible = [];
+    listEditable = [];
     for(int i = 0; i < list.length; ++i){
-      listEditible.add(list[i].copy());
-      listEditible[i].editable = true;
+      listEditable.add(list[i].copy());
+      listEditable[i].editable = true;
       print("${list[i].x} ${list[i].y}");
     }
     // editor!.reload();
     viewer.reload();
   }
 
-  void sort() {
+  void sort({bool sortEditable = true}) {
     // list.sort((a, b) => a.priority.compareTo(b.priority));
-    listEditible.sort((a, b) => a.priority.compareTo(b.priority));
-    if (editor != null) {
-      editor!.reload();
+    if (sortEditable) {
+      listEditable.sort((a, b) => a.priority.compareTo(b.priority));
+      if (editor != null) {
+        editor!.reload();
+      }
+    }
+    else{
+      list.sort((a, b) => a.priority.compareTo(b.priority));
+      viewer.reload();
     }
     // viewer.reload();
   }
 
   void onTop(DragAndDrop dnd) {
-    dnd.priority = listEditible.last.priority + 5;
+    dnd.priority = listEditable.last.priority + 5;
     sort();
-    for (int i = 0; i < listEditible.length; ++i){
-      if (listEditible[i].priority != i) {
-        listEditible[i].priority = i;
-        listEditible[i].uploadedState = DNDState.edited;
+    for (int i = 0; i < listEditable.length; ++i){
+      if (listEditable[i].priority != i) {
+        listEditable[i].priority = i;
+        if (listEditable[i].uploadedState != DNDState.created) {
+          listEditable[i].uploadedState = DNDState.edited;
+        }
       }
     }
     editor!.reload();
@@ -97,7 +97,7 @@ class PictureDropStack {
     for (var doc in a.docs) {
       list.add(DragAndDrop.fromDocumentSnapshot(doc, this));
     }
-    sort();
+    sort(sortEditable: false);
     viewer.reload();
   }
 

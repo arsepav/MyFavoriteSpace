@@ -63,7 +63,9 @@ class DNDPicture extends StatefulWidget implements DNDContent {
 
   Future<void> getImage(bool pick) async {
     if (pick) {
+      print("pick!");
       imageFile = await pickImage();
+      print("pick2");
       if (imageFile != null) {
         print("not null");
         image = Image.file(imageFile!, fit: BoxFit.cover);
@@ -86,6 +88,7 @@ class DNDPicture extends StatefulWidget implements DNDContent {
   }
 
   DNDPicture.new(this.editable, {super.key}) {
+    print("DND picture");
     getImage(true);
   }
 

@@ -19,7 +19,7 @@ final _imagePicker = ImagePicker();
 
 Future<File?> pickImage() async {
   XFile? image;
-  await Permission.photos.request();
+  // await Permission.photos.request();
   var permissionStatus = await Permission.photos.status;
 
   if (permissionStatus.isGranted || !permissionStatus.isGranted) {
