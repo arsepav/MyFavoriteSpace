@@ -16,6 +16,8 @@ class DNDPicture extends StatefulWidget implements DNDContent {
   late Image image;
   File? imageFile;
   String downloadUrl = '';
+  String group;
+  late DocumentReference docRef;
 
   DocumentSnapshot<Map<String, dynamic>>? docSnapshot;
 
@@ -30,6 +32,7 @@ class DNDPicture extends StatefulWidget implements DNDContent {
   Map<String, dynamic> toJson() {
     return {
       'download_url' : downloadUrl,
+      'group': group,
     };
   }
 
@@ -40,7 +43,7 @@ class DNDPicture extends StatefulWidget implements DNDContent {
     if (state != ContentState.valid){
       throw Exception("Trying to save not valid picture");
     }
-    var docRef = await storage.add(toJson());
+    docRef = await storage.add(toJson());
     downloadUrl = await uploadImage(imageFile!, docRef.id);
     await docRef.update(toJson());
     state = ContentState.uploaded;
@@ -52,7 +55,7 @@ class DNDPicture extends StatefulWidget implements DNDContent {
     if (state != ContentState.uploaded){
       throw Exception("Trying to delete not uploaded doc");
     }
-    await docSnapshot!.reference.delete();
+    await docRef.delete();
     await FirebaseStorage.instance
         .ref()
         .child('images/picture_${docId}')
@@ -63,23 +66,21 @@ class DNDPicture extends StatefulWidget implements DNDContent {
 
   Future<void> getImage(bool pick) async {
     if (pick) {
-      print("pick!");
       imageFile = await pickImage();
-      print("pick2");
       if (imageFile != null) {
-        print("not null");
         image = Image.file(imageFile!, fit: BoxFit.cover);
         state = ContentState.valid;
       }
       else {
-        print("null");
         state = ContentState.invalid;
       }
     }
     else {
-      print("DOCID:::");
-      print(docId);
       docSnapshot = await storage.doc(docId).get();
+      if (docSnapshot == null){
+        throw Exception("Snapshot is null!!!");
+      }
+      docRef = docSnapshot!.reference;
       downloadUrl = docSnapshot!['download_url'];
       image = Image.network(downloadUrl, fit: BoxFit.cover);
       state = ContentState.uploaded;
@@ -87,12 +88,12 @@ class DNDPicture extends StatefulWidget implements DNDContent {
     listener.notify();
   }
 
-  DNDPicture.new(this.editable, {super.key}) {
+  DNDPicture.new(this.editable, this.group, {super.key}) {
     print("DND picture");
     getImage(true);
   }
 
-  DNDPicture.from_firebase(this.docId, this.editable, {super.key}) {
+  DNDPicture.from_firebase(this.docId, this.editable, this.group, {super.key}) {
     getImage(false);
   }
 

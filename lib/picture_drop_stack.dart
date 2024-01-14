@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:some_space/authentication/authentication_service.dart';
 import 'package:some_space/drag_and_drop.dart';
 import 'package:some_space/space.dart';
 import 'package:some_space/space_editor.dart';
@@ -93,7 +94,6 @@ class PictureDropStack {
 
   Future<void> fillList(edit) async {
     var a = await storage.where('group', isEqualTo: group).get();
-    Image img;
     for (var doc in a.docs) {
       list.add(DragAndDrop.fromDocumentSnapshot(doc, this));
     }

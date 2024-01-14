@@ -2,25 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:some_space/space_viewer.dart';
 
-Future<String> createGroup(String name, String password) async {
-  print("check12");
-  var a = await FirebaseFirestore.instance.collection("groups").add({'name':name, 'password':password});
-  print("check13");
-  return a.id;
-}
-
-Future<String> createGroupCheck(String name, String password) async {
-  var a = await FirebaseFirestore.instance.collection("groups").where('name', isEqualTo: name).get();
-  if (a.size == 0){
-    return createGroup(name, password);
-  }
-  return "";
-}
+import 'authentication/authentication_service.dart';
+import 'group_class.dart';
 
 class CreatingGroupScreen extends StatefulWidget {
   final groups_storage = FirebaseFirestore.instance.collection("groups");
 
   CreatingGroupScreen({super.key});
+
   @override
   _CreatingGroupScreenState createState() => _CreatingGroupScreenState();
 }
@@ -32,21 +21,25 @@ class _CreatingGroupScreenState extends State<CreatingGroupScreen> {
   bool groupAlreadyExists = false;
 
   Future<void> someFunction(String name, String password) async {
-    String group = await createGroupCheck(name, password);
-    setState(() {
-      isLoading = false;
-    });
-    if (group != "") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => SpaceViewer(group),
-        ),
-      );
-    }
-    else{
-      groupAlreadyExists = true;
-    }
+    late Group group;
+    group = Group.create(
+      name,
+      callback: (bool a) {
+        setState(() {
+          isLoading = false;
+        });
+        if (a) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SpaceViewer(group),
+            ),
+          );
+        } else {
+          groupAlreadyExists = true;
+        }
+      },
+    );
   }
 
   @override
@@ -73,19 +66,22 @@ class _CreatingGroupScreenState extends State<CreatingGroupScreen> {
               isLoading
                   ? const CircularProgressIndicator()
                   : Column(
-                    children: [
-                      groupAlreadyExists ? const Text("Space already exists") : Container(),
-                      ElevatedButton(
-                onPressed: () {
-                      setState(() {
-                        isLoading = true;
-                      });
-                      someFunction(inputController1.text, inputController2.text);
-                },
-                child: const Text('Create'),
-              ),
-                    ],
-                  ),
+                      children: [
+                        groupAlreadyExists
+                            ? const Text("Space already exists")
+                            : Container(),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            someFunction(
+                                inputController1.text, inputController2.text);
+                          },
+                          child: const Text('Create'),
+                        ),
+                      ],
+                    ),
             ],
           ),
         ),

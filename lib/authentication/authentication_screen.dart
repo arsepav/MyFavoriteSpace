@@ -4,6 +4,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:some_space/authentication/authentication_service.dart';
 import 'package:some_space/creating_screen.dart';
+
+import '../login_screen.dart';
 bool error = false;
 String error_text = "";
 
@@ -11,6 +13,7 @@ bool checkEmail(String email){
   return RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
       .hasMatch(email);
 }
+
 
 class AuthenticationScreen extends StatefulWidget {
   AuthenticationScreen({super.key});
@@ -65,7 +68,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CreatingGroupScreen(),
+                        builder: (_) => LogInScreen(),
                       ),
                     );
                   }
@@ -98,7 +101,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CreatingGroupScreen(),
+                      builder: (_) => LogInScreen(),
                     ),
                   );
                 }

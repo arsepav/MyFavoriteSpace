@@ -1,22 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:some_space/authentication/authentication_service.dart';
 import 'package:some_space/creating_screen.dart';
 import 'package:some_space/memory_saver.dart';
+import 'package:some_space/profile/profile_screen.dart';
 import 'package:some_space/space_viewer.dart';
 import 'package:some_space/theme/theme_constants.dart';
 import 'package:some_space/theme/theme_manager.dart';
 
-Future<String> joinGroupCheck(String name, String password) async {
+import 'group_class.dart';
+
+Future<QuerySnapshot<Object?>?> joinGroupCheck(
+    String name, String password) async {
   var a = await FirebaseFirestore.instance
       .collection("groups")
       .where('name', isEqualTo: name)
+      .where(
+        Filter.or(
+          Filter("viewers", arrayContains: "*"),
+          Filter(
+            "viewers",
+            arrayContains: getEmail(),
+          ),
+        ),
+      )
       .get();
 
   if (a.size == 1 && a.docs[0]['password'] == password) {
-    return a.docs[0].id;
+    return a;
   }
-  return "";
+  return null;
 }
 
 class LogInScreen extends StatefulWidget {
@@ -36,43 +50,44 @@ class _LogInScreenState extends State<LogInScreen> {
   bool joinProblem = false;
 
   @override
-  void dispose(){
+  void dispose() {
     themeManager.removeListener(themeListener);
     super.dispose();
   }
 
   @override
-  void initState(){
+  void initState() {
     themeManager.addListener(themeListener);
     super.initState();
   }
 
-  themeListener(){
-    if (mounted){
-      setState(() {
-
-      });
+  themeListener() {
+    if (mounted) {
+      setState(() {});
     }
   }
 
   Future<void> someFunction(String name, String password) async {
-    String group = await joinGroupCheck(name, password);
-    setState(() {
-      isLoading = false;
+    // String group = "hello";//await joinGroupCheck(name, password);
+    late Group group;
+    group = Group(name, callback: (bool a) {
+      setState(() {
+        isLoading = false;
+      });
+      if (a) {
+        groupTextController.clear();
+        passwordTextController.clear();
+        addRecentGroups(name, password);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SpaceViewer(group),
+          ),
+        );
+      } else {
+        joinProblem = true;
+      }
     });
-    if (group != "") {
-      groupTextController.clear();
-      passwordTextController.clear();
-      addRecentGroups(name,password);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => SpaceViewer(group),
-        ),
-      );
-    } else {
-      joinProblem = true;
-    }
   }
 
   @override
@@ -98,6 +113,17 @@ class _LogInScreenState extends State<LogInScreen> {
             themeNotifier.setTheme(newTheme);
           });
         }),*/
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProfileScreen(),
+                ),
+              );
+            },
+            icon: Icon(Icons.person),
+          ),
         ],
       ),
       body: Padding(
@@ -152,9 +178,13 @@ class _LogInScreenState extends State<LogInScreen> {
                 // style: ElevatedButton.styleFrom(backgroundColor: DarkTheme.buttonsColor),
                 child: const Text("Create new group"),
               ),
-              const SizedBox(height: 25,),
+              const SizedBox(
+                height: 25,
+              ),
               const Text("Here you can find recent groups:"),
-              const SizedBox(height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
               FutureBuilder<List<List<String>>>(
                 future: getRecentGroups(),
                 builder: (context, snapshot) {
@@ -169,9 +199,11 @@ class _LogInScreenState extends State<LogInScreen> {
                         shrinkWrap: true,
                         itemCount: len > 3 ? 3 : len,
                         itemBuilder: (context, index) {
-                          return ElevatedButton(onPressed: (){
-                            someFunction(groups[index][0], groups[index][1]);
-                          },
+                          return ElevatedButton(
+                              onPressed: () {
+                                someFunction(
+                                    groups[index][0], groups[index][1]);
+                              },
                               // style: ElevatedButton.styleFrom(backgroundColor: DarkTheme.buttonsColor),
                               child: Text(groups[index][0]));
                         },

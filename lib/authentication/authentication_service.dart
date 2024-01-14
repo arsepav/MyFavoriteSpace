@@ -11,6 +11,11 @@ bool is_logged_in(){
   return true;
 }
 
+
+String? getEmail(){
+  return _firebaseAuth.currentUser?.email;
+}
+
 Future<String> singIn(
     {required String username, required String password}) async {
   try {

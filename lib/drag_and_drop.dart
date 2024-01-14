@@ -91,7 +91,7 @@ class DragAndDrop extends StatefulWidget {
     print("create dnd");
     switch (type) {
       case 'picture':
-        dndContent = DNDPicture(false);
+        dndContent = DNDPicture(false, this.group!);
     }
   }
 
@@ -116,7 +116,7 @@ class DragAndDrop extends StatefulWidget {
 
     switch (type) {
       case 'picture':
-        dndContent = DNDPicture.from_firebase(documentSnapshot!['content'], true);
+        dndContent = DNDPicture.from_firebase(documentSnapshot!['content'], true, this.group!);
         break;
       default:
         throw Exception('No such type');

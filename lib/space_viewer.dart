@@ -1,17 +1,22 @@
-import 'package:some_space/drag_and_drop.dart';
+import 'package:some_space/authentication/authentication_service.dart';
 import 'package:some_space/picture_drop_stack.dart';
 import 'package:some_space/space.dart';
 import 'package:some_space/space_editor.dart';
 
-import 'image_picker.dart';
+import 'group_class.dart';
 import 'package:flutter/material.dart';
 
+
 class SpaceViewer extends Space {
-  String group;
+  Group group;
+
+  bool isEditor = false;
+
   late PictureDropStack dnds;
 
   SpaceViewer(this.group) {
-    dnds = PictureDropStack(group);
+    dnds = PictureDropStack(group.id);
+    isEditor = group.editor == getEmail();
   }
 
   @override
@@ -21,32 +26,32 @@ class SpaceViewer extends Space {
 class SpaceViewerState extends State<SpaceViewer> implements SpaceState {
   @override
   void reload() {
-
     setState(() {});
-
-    // print(widget.dnds.list.length);
   }
 
   @override
   Widget build(BuildContext context) {
-
-    print("reloaded");
-    for (int i = 0; i < widget.dnds.list.length; ++i){
-      print("this_> ${widget.dnds.list[i].x} ${widget.dnds.list[i].y}");
-    }
     widget.dnds.viewer = this;
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Drag and Drop Widget'),
-          actions: [IconButton(onPressed: (){
-            widget.dnds.openEditState();
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => SpaceEditor(widget.group, widget.dnds),
-              ),
-            );
-          }, icon: Icon(Icons.edit))],
+          title: Text(widget.group.name),
+          actions: [
+            widget.isEditor
+                ? IconButton(
+                    onPressed: () {
+                      widget.dnds.openEditState();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              SpaceEditor(widget.group.id, widget.dnds),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.edit),
+                  )
+                : Container()
+          ],
         ),
         body: Stack(
           children: [
