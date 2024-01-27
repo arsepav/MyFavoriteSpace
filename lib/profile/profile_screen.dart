@@ -27,14 +27,15 @@ Future<List<Map<String, dynamic>>>? getVisible() async {
 }
 
 class ProfileScreen extends StatelessWidget {
-  final String userName = "John Doe"; // Пример имени пользователя
+  const ProfileScreen({super.key});
+
 
   @override
   Widget build(BuildContext context) {
     var email = getEmail();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Your profile'),
+        title: const Text('Your profile'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -43,23 +44,23 @@ class ProfileScreen extends StatelessWidget {
           children: <Widget>[
             Text(
               'Your email: $email',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               'You created:',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             buildListView(true),
-            SizedBox(height: 16),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               'You are viewer in:',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             buildListView(false),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () {
                 signOut();
@@ -73,7 +74,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 );
               },
-              child: Text('Sign out'),
+              child: const Text('Sign out'),
             ),
           ],
         ),
@@ -87,21 +88,20 @@ class ProfileScreen extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done &&
             snapshot.hasData) {
-          return Container(
-            height: 120, // Высота списка (можете настроить под свои нужды)
+          return SizedBox(
+            height: 120,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: snapshot.data!.length,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
                   width: 80,
-                  // Ширина элемента списка (можете настроить под свои нужды)
-                  margin: EdgeInsets.only(right: 8),
+                  margin: const EdgeInsets.only(right: 8),
                   color: Colors.black,
                   child: Center(
                     child: Text(
                       snapshot.data![index]['name'],
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 );
@@ -109,11 +109,9 @@ class ProfileScreen extends StatelessWidget {
             ),
           );
         } else if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         } else {
-          return Container(
-            child: Icon(Icons.error),
-          );
+          return const Icon(Icons.error);
         }
       },
     );
