@@ -30,7 +30,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Authentication"),
+        title: Text("Authentication", style: TextStyle(),),
       ),
       body: Center(
         child: Padding(

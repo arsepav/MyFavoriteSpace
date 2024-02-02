@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       create: (_) => ThemeNotifier(lightTheme),
       child: MaterialApp(
         theme: darkTheme,
-        themeMode: themeManager.themeMode,
+        // themeMode: themeManager.themeMode,
         home: is_logged_in() ? LogInScreen(): AuthenticationScreen() ,
       ),
     );
